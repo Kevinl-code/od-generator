@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ADD THIS INSIDE YOUR <head> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>OD Letter Generator</title>
+
+<style>
+/* YOUR FULL ORIGINAL CSS — unchanged */
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+}
+.input-container {
+    width: 40%;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.preview-container {
+    width: 60%;
+    background: white;
+    padding: 50px;
+    min-height: 297mm;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.student-entry {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+select {
+    width: 100%;
+    padding: 10px;
+}
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.add-btn { background:#27ae60;color:white;}
+.print-btn{ background:#3498db;color:white;width:100%;}
+
+@media print {
+    .input-container { display: none; }
+    .preview-container { width: 100%; box-shadow: none; padding: 0; }
+}
+ #letter-content {
+            font-family: "Times New Roman", Times, serif;
+            line-height: 1.6;
+            color: black;
+            font-size: 12pt;
+        }
+
+        .header-section { text-align: center; font-weight: bold; font-size: 14pt; margin-bottom: 10px; }
+        
+        .date-place-section {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .address-block { margin-bottom: 20px; }
+        .subject-line { font-weight: bold; margin: 20px 0; }
+        .letter-body { text-align: justify; margin-bottom: 30px; }
+
+        .thanking-you { text-align: center; margin-bottom: 40px; }
+        
+        .signature-section {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Print Logic */
+        @media print {
+            .input-container { display: none; }
+            .preview-container { 
+                width: 100%; 
+                box-shadow: none; 
+                padding: 0;
+                margin: 0;
+            }
+            body { background: white; padding: 0; }
+        }
+
+</style>
+</head>
+
+<body>
+
+<div class="input-container">
+    <h2>OD Letter Details</h2>
+
+    <div class="form-group">
+        <label>Current Date</label>
+        <input type="text" id="inDate" placeholder="" oninput="updateLetter()">
+    </div>
+    <div class="form-group">
+        <label>Place</label>
+        <input type="text" id="inPlace" placeholder="Trichy" oninput="updateLetter()">
+    </div>
+    <div class="form-group">
+        <label>Subject & Body</label>
+        <input type="text" id="inEvent" placeholder="" oninput="updateLetter()">
+    </div>
+    <div class="form-group">
+        <label>Organized By (Department/College)</label>
+        <input type="text" id="inOrg" placeholder="" oninput="updateLetter()">
+    </div>
+    <div class="form-group">
+        <label>Organising Date</label>
+        <input type="text" id="inEventDate" placeholder="" oninput="updateLetter()">
+    </div>
+    <hr>
+
+    <h3>Students List</h3>
+    <div id="student-inputs"></div>
+
+    <button class="btn add-btn" onclick="addStudentRow()">+ Add Student</button>
+    <button class="btn print-btn" onclick="window.print()">Download as PDF</button>
+</div>
+
+<div class="preview-container">
+    <div id="letter-content">
+        <div class="header-section">Permission Letter</div>
+        
+        <div class="date-place-section">
+            <span id="outDate">DD/MM/YYYY</span><br>
+            <span id="outPlace">Place</span>
+        </div>
+
+        <div class="address-block">
+            <strong>From:</strong><br>
+            M.Sc Data Science Students,<br>
+            Department of Data Science,<br>
+            Bishop Heber College,<br>
+            Trichy.
+        </div>
+
+        <div class="address-block">
+            <strong>To:</strong><br>
+            The Head of Department,<br>
+            Department of Data Science,<br>
+            Bishop Heber College,<br>
+            Trichy.
+        </div>
+
+        <div>Respected Madam,</div>
+
+        <div class="subject-line">
+            Sub: Request for OD permission to participate in <span id="outSubEvent"> </span>.
+        </div>
+
+        <div class="letter-body">
+            We the students of   MSc Data Science request you to kindly grant us permission to participate in 
+            <span id="outBodyEvent">the</span>, 
+            organised by <span id="outOrg"></span> 
+            on <span id="outEventDate"></span>.
+            <br><br>
+            Thank you for consideration and I have mentioned the students name & Roll no as reference below:
+        </div>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                </tr>
+            </thead>
+            <tbody id="studentBody">
+                </tbody>
+        </table>
+<br><br><br>
+        <div class="thanking-you">Thanking You</div>
+
+        <div class="signature-section">
+            Yours Obediently,<br>
+            M.Sc Data Science Students
+        </div>
+        <div style="text-align:center;margin-top:30px;">
+    <div id="qr"></div>
+    <small>Scan to verify OD authenticity</small>
+</div>
+    </div>
+</div>
+
+<script>
+let students = [];
+let selected = new Set();
+
+/* ------------------ FETCH STUDENTS FROM BACKEND ------------------ */
+
+fetch('/get_students')
+  .then(res => res.json())
+  .then(data => {
+      students = data;
+      addStudentRow();
+  });
+
+/* ------------------ ADD STUDENT DROPDOWN ------------------ */
+
+function addStudentRow() {
+    const container = document.getElementById('student-inputs');
+
+    const div = document.createElement('div');
+    div.className = 'student-entry';
+
+    const select = document.createElement('select');
+    select.innerHTML = `<option value="">-- Select Student --</option>`;
+
+    students.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.Name + "||" + s.Roll;
+        opt.textContent = `${s.Name} (${s.Roll})`;
+        select.appendChild(opt);
+    });
+
+    select.onchange = () => {
+        updateStudentTable();
+    };
+
+    div.appendChild(select);
+    container.appendChild(div);
+}
+
+/* ------------------ UPDATE STUDENT TABLE ------------------ */
+
+function updateStudentTable() {
+    const selects = document.querySelectorAll("select");
+    const tbody = document.getElementById('studentBody');
+    tbody.innerHTML = '';
+    selected.clear();
+
+    selects.forEach(sel => {
+        if (sel.value) selected.add(sel.value);
+    });
+
+    // Disable duplicates
+    selects.forEach(sel => {
+        [...sel.options].forEach(opt => {
+            opt.disabled = selected.has(opt.value) && opt.value !== sel.value;
+        });
+    });
+
+    let i = 1;
+    selected.forEach(v => {
+        const [name, roll] = v.split("||");
+        const row = tbody.insertRow();
+        row.insertCell(0).innerText = i++;
+        row.insertCell(1).innerText = name;
+        row.insertCell(2).innerText = roll;
+    });
+}
+
+/* ------------------ UPDATE LETTER CONTENT ------------------ */
+
+function updateLetter() {
+
+    document.getElementById('outDate').innerText =
+        document.getElementById('inDate').value || "";
+
+    document.getElementById('outPlace').innerText =
+        document.getElementById('inPlace').value || "Trichy";
+
+    const event = document.getElementById('inEvent').value || "";
+    document.getElementById('outSubEvent').innerText = event;
+    document.getElementById('outBodyEvent').innerText = event;
+
+    document.getElementById('outOrg').innerText =
+        document.getElementById('inOrg').value || "";
+
+    document.getElementById('outEventDate').innerText =
+        document.getElementById('inEventDate').value || "";
+}
+
+/* ------------------ INIT ------------------ */
+
+updateLetter();
+function generateQR() {
+
+    const data = {
+        date: inDate.value,
+        place: inPlace.value,
+        event: inEvent.value,
+        org: inOrg.value,
+        event_date: inEventDate.value,
+        students: Array.from(selected)
+    };
+
+    fetch('/save_od', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(r => {
+        const verifyURL = location.origin + "/verify/" + r.od_id;
+        document.getElementById("qr").innerHTML = "";
+        new QRCode(document.getElementById("qr"), {
+            text: verifyURL,
+            width: 120,
+            height: 120
+        });
+    });
+}
+
+window.onbeforeprint = generateQR;
+</script>
+</body>
+</html>

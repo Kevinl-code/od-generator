@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>OD Verification</title>
+<style>
+body{
+    font-family:Segoe UI;
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.card{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:400px;
+    box-shadow:0 0 15px rgba(0,0,0,.2);
+}
+.success{
+    color:green;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    {% if record %}
+        <h2 class="success">✔ Verified OD Letter</h2>
+        <p><b>OD ID:</b> {{ od_id }}</p>
+        <p><b>Date:</b> {{ record.date }}</p>
+        <p><b>Place:</b> {{ record.place }}</p>
+        <p><b>Event:</b> {{ record.event }}</p>
+        <p><b>Organized By:</b> {{ record.org }}</p>
+        <p><b>Event Date:</b> {{ record.event_date }}</p>
+        <p><b>Students:</b></p>
+        <ul>
+            {% for s in record.students %}
+                <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+        <p><b>Generated On:</b> {{ record.timestamp }}</p>
+    {% else %}
+        <h2 style="color:red;">❌ Invalid / Fake OD</h2>
+    {% endif %}
+</div>
+
+</body>
+</html>
