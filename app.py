@@ -1,11 +1,9 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import pandas as pd
-import uuid
-import json
+import uuid, json, os
 from datetime import datetime
 
 app = Flask(__name__)
-
 DB_FILE = "od_records.json"
 
 def load_students():
@@ -43,7 +41,6 @@ def get_students():
 
 @app.route("/save_od", methods=["POST"])
 def save_od():
-    from flask import request
     data = request.json
     od_id = save_od_record(data)
     return jsonify({"od_id": od_id})
@@ -55,4 +52,5 @@ def verify(od_id):
     return render_template("verify.html", record=record, od_id=od_id)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
